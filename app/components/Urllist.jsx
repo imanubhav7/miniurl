@@ -64,7 +64,7 @@ export default function Urllist({ links = [], refresh, setLinks }) {
 
     toast.success("Link deleted");
 
-    // Remove from UI instantly
+    // 
     setLinks((prev) => prev.filter((l) => l.code !== deleteCode));
 
     setOpenDelete(false);
@@ -99,8 +99,8 @@ export default function Urllist({ links = [], refresh, setLinks }) {
               )}
 
               {links.map((l) => (
-                <TableRow key={l.code} className="transition-colors hover:bg-white/10">
-                  {/* FIXED: Use <a> tag instead of Next.js <Link> — NO PREFETCH */}
+                <TableRow key={l.code} className="transition-colors hover:bg-white/20">
+                 
                   <TableCell className="break-all">
                     <a
                       href={`/${l.code}`}
