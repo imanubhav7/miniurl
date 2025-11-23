@@ -92,7 +92,7 @@ export default function Urllist({ links = [], refresh, setLinks }) {
             <TableBody>
               {links.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-6 text-center text-white/80">
+                  <TableCell colSpan={4} className="py-6 text-center text-black">
                     No links yet.
                   </TableCell>
                 </TableRow>
