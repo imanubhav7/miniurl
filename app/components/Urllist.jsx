@@ -18,7 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Copy, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fadeSlideUp, floatHover } from "@/lib/animations";
 import { toast } from "sonner";
@@ -30,43 +29,42 @@ export default function Urllist({ links = [], refresh, setLinks }) {
   const router = useRouter();
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-  // gsap animation
+  // GSAP Animations
   useEffect(() => {
-    if (links.length > 0 && tableRef.current)
+    if (links.length > 0 && tableRef.current) {
       fadeSlideUp(tableRef.current, 0.06);
+    }
   }, [links.length]);
 
   useEffect(() => {
     if (tableRef.current) floatHover(tableRef.current);
   }, []);
 
-  // click fn 
-  const increaseClickCount = (code) => {
-    setLinks((prev) =>
-      prev.map((item) =>
-        item.code === code ? { ...item, clickCount: item.clickCount + 1 } : item
-      )
-    );
-  };
-
-  // shortURL fn
+  // Copy short link
   const copyShort = (code) => {
     const url = `${baseUrl}/${code}`;
     navigator.clipboard.writeText(url);
-    toast.success("Copied short URL");
+    toast.success("Copied short URL!");
   };
 
-  // Delete Fn 
+  // Delete link
   const handleDelete = async () => {
     if (!deleteCode) return toast.error("No code selected");
 
-    const res = await fetch(`/api/links/${deleteCode}`, { method: "DELETE" });
+    const res = await fetch(`/api/links/${deleteCode}`, {
+      method: "DELETE",
+    });
+
     const data = await res.json();
 
-    if (!res.ok) return toast.error(data.error || "Delete failed");
+    if (!res.ok) {
+      toast.error(data.error || "Delete failed");
+      return;
+    }
 
-    toast.success("Deleted");
+    toast.success("Link deleted");
 
+    // Remove from UI instantly
     setLinks((prev) => prev.filter((l) => l.code !== deleteCode));
 
     setOpenDelete(false);
@@ -76,21 +74,14 @@ export default function Urllist({ links = [], refresh, setLinks }) {
 
   return (
     <>
-      <div
-        className="backdrop-blur-xl bg-white border
-                rounded-2xl p-6 w-full max-w-5xl mx-auto shadow-lg"
-      >
-        <h2 className="text-lg sm:text-2xl font-semibold mb-3">
-          Your Shortened Links
-        </h2>
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 
+                rounded-2xl p-6 w-full max-w-5xl mx-auto shadow-lg">
+        <h2 className="text-lg sm:text-2xl font-semibold mb-3">Your Shortened Links</h2>
 
-        <div
-          ref={tableRef}
-          className="max-h-[440px] overflow-auto border rounded-md"
-        >
+        <div ref={tableRef} className="max-h-[440px] overflow-auto border rounded-md">
           <Table className="min-w-[680px]">
             <TableHeader className="sticky top-0 bg-white/10 backdrop-blur-md text-white">
-              <TableRow className="hover:bg-white/10 transition">
+              <TableRow>
                 <TableHead>Short URL</TableHead>
                 <TableHead>Original URL</TableHead>
                 <TableHead>Clicks</TableHead>
@@ -99,48 +90,41 @@ export default function Urllist({ links = [], refresh, setLinks }) {
             </TableHeader>
 
             <TableBody>
-              {!links.length && (
+              {links.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-black text-center font-semibold text-md"
-                  >
+                  <TableCell colSpan={4} className="py-6 text-center text-white/80">
                     No links yet.
                   </TableCell>
                 </TableRow>
               )}
 
               {links.map((l) => (
-                <TableRow
-                  key={l.code}
-                  className="transition-colors hover:bg-slate-50/70"
-                >
+                <TableRow key={l.code} className="transition-colors hover:bg-white/10">
+                  {/* FIXED: Use <a> tag instead of Next.js <Link> — NO PREFETCH */}
                   <TableCell className="break-all">
-                    <Link
+                    <a
                       href={`/${l.code}`}
                       target="_blank"
-                      className="text-sky-600 underline"
-                      onClick={() => increaseClickCount(l.code)}
+                      rel="noopener noreferrer"
+                      className="text-sky-400 underline"
                     >
                       {`${baseUrl}/${l.code}`}
-                    </Link>
+                    </a>
                   </TableCell>
 
                   <TableCell className="truncate max-w-[380px]">
                     {l.longUrl}
                   </TableCell>
 
-                  <TableCell>{l.clickCount}</TableCell>
+                  <TableCell className="text-center">{l.clickCount}</TableCell>
 
                   <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyShort(l.code)}
-                    >
+                    {/* Copy Button */}
+                    <Button variant="outline" size="sm" onClick={() => copyShort(l.code)}>
                       <Copy className="w-4 h-4" />
                     </Button>
 
+                    {/* Delete Button */}
                     <Button
                       variant="destructive"
                       size="sm"
@@ -159,22 +143,20 @@ export default function Urllist({ links = [], refresh, setLinks }) {
         </div>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Link</DialogTitle>
           </DialogHeader>
+
           <p className="text-sm text-slate-600">
-            Are you sure? you want to delete this link.
+            Are you sure? This action cannot be undone.
           </p>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDelete(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
+            <Button variant="outline" onClick={() => setOpenDelete(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
