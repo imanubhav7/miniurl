@@ -74,7 +74,7 @@ export default function Urllist({ links = [], refresh, setLinks }) {
 
   return (
     <>
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 
+      <div className="backdrop-blur-xl bg-white border border-white 
                 rounded-2xl p-6 w-full max-w-5xl mx-auto shadow-lg">
         <h2 className="text-lg sm:text-2xl font-semibold mb-3">Your Shortened Links</h2>
 
